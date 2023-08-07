@@ -1,0 +1,14 @@
+{
+   "environment":{
+      "value":"prod"
+   },
+   "project":{
+      "value":"Sage_Lakehouse"
+   },
+   "databricksWorkspaceName":{
+      "value":"SageHealthy_Databricks"
+   },
+   "location":{
+      "value":"eastus"
+   }
+}

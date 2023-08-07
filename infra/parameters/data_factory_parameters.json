@@ -1,0 +1,14 @@
+{
+   "environment":{
+      "value":"prod"
+   },
+   "project":{
+      "value":"Sage_Lakehouse"
+   },
+   "factoryName":{
+      "value":"SageHealthy_DataFactory"
+   },
+   "location":{
+      "value":"eastus"
+   }
+}
