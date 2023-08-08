@@ -1,0 +1,23 @@
+{
+   "environment":{
+      "value":"prod"
+   },
+   "project":{
+      "value":"Sage_Lakehouse"
+   },
+   "storageAccountName":{
+      "value":"prodlakesagehealthy"
+   },
+   "bronzeLayer":{
+      "value":"bronze"
+   },
+   "silverLayer":{
+      "value":"silver"
+   },
+   "goldLayer":{
+      "value":"gold"
+   },
+   "location":{
+      "value":"eastus"
+   }
+}

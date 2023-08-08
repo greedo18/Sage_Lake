@@ -1,0 +1,24 @@
+{
+   "vaultName":{
+      "value":"deploySageKV"
+   },
+   "synapseWorkspaceName":{
+      "value":"SageHealthySyn"
+   },
+    "synapseStorageAccount":{
+      "value":"prodlakesagehealthy"
+   },
+    "synapseStorageAccountFilesystem":{
+      "value":"gold"
+   },
+    "adminPasswordsecretName":{
+      "value":"SQLPASSWORD"
+   },
+    "adminLoginUsersecretName":{
+      "value":"SQLUSER"
+   },
+    "vaultResourceGroupName":{
+      "value":"SageHealthy_prod"
+   }
+}
+
