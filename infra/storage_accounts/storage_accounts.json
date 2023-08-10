@@ -49,8 +49,8 @@
                   },
               "tags": {
                 "owner":"Data-Sage",
-                "project":"Sagelakehouse",
-                "environment":"production"
+                "project":"Sage_lakehouse",
+                "environment":"prod"
               },
 			  "resources": [
 				{
