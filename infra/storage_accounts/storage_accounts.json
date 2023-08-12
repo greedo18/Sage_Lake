@@ -50,7 +50,8 @@
               "tags": {
                 "owner":"Data-Sage",
                 "project":"Sage_lakehouse",
-                "environment":"prod"
+                "environment":"prod",
+		"group":"devteam"
               },
 			  "resources": [
 				{
