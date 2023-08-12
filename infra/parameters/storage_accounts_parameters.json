@@ -6,7 +6,7 @@
       "value":"Sage_Lakehouse"
    },
    "storageAccountName":{
-      "value":"prodlakesagehealthy"
+      "value":"SageHealthy"
    },
    "bronzeLayer":{
       "value":"bronze"
