@@ -51,7 +51,8 @@
                 "owner":"Data-Sage",
                 "project":"Sage_lakehouse",
                 "environment":"prod",
-		"group":"devteam"
+				"test":"testing",
+				"group":"devteam"
               },
 			  "resources": [
 				{
