@@ -1,0 +1,403 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		},
+		"hubdbsource": {
+			"type": "string"
+		},
+		"traininglakehouse": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+    "resources":[
+		{
+		   "name":"[concat(parameters('factoryName'), '/sage_batch_ingestion_pipeline')]",
+		   "type":"Microsoft.DataFactory/factories/pipelines",
+		   "apiVersion":"2018-06-01",
+		   "properties":{
+			  "description":"This pipeline will ingest data from the 835-837 edi raw database",
+			  "activities":[
+				 {
+					"name":"Find 835837DB Tables",
+					"type":"Lookup",
+					"dependsOn":[
+					   {
+						  "activity":"Get Secret",
+						  "dependencyConditions":[
+							 "Succeeded"
+						  ]
+					   }
+					],
+					"policy":{
+					   "timeout":"0.12:00:00",
+					   "retry":0,
+					   "retryIntervalInSeconds":30,
+					   "secureOutput":false,
+					   "secureInput":false
+					},
+					"userProperties":[
+  
+					],
+					"typeProperties":{
+					   "source":{
+						  "type":"AzureSqlSource",
+						  "sqlReaderQuery":"SELECT QUOTENAME(table_schema)+'.'+QUOTENAME(table_name) AS Table_Name FROM information_Schema.tables WHERE table_name in ('BusinessUnit', 'Customers', 'CustomersPayers', 'CustomersPrescribers', 'CustomersPrograms', 'CustomersProgramsExtended', 'CustomersRecords', 'Dispositions', 'DispositionsConfig', 'FieldEV', 'Locations', 'Payers', 'Prescribers', 'Programs', 'Queues', 'InterchangeInboundEdiType', 'InterchangeInboundFile', 'InterchangeInboundFileStatus', 'FunctionalGroupInbound', 'In_835X221_ClaimPayInfo', 'In_835X221_Detail', 'In_835X221_Header', 'In_835X221_HealthCareRemarkCode', 'In_835X221_ServiceInfo', 'In_837X222_Claims', 'In_837X222_Dependent', 'In_837X222_Header', 'In_837X222_InfoSource', 'In_837X222_OtherSubscriberInfo', 'In_837X222_ServiceDocument','In_837X222_ServiceLine', 'In_837X222_ServiceLineAdj', 'In_837X222_Subscriber')",
+						  "queryTimeout":"02:00:00",
+						  "partitionOption":"None"
+					   },
+					   "dataset":{
+						  "referenceName":"hubdbsource",
+						  "type":"DatasetReference",
+						  "parameters":{
+  
+						  }
+					   },
+					   "firstRowOnly":false
+					}
+				 },
+				 {
+					"name":"For Each Table",
+					"type":"ForEach",
+					"dependsOn":[
+					   {
+						  "activity":"Find 835837DB Tables",
+						  "dependencyConditions":[
+							 "Succeeded"
+						  ]
+					   }
+					],
+					"userProperties":[
+  
+					],
+					"typeProperties":{
+					   "items":{
+						  "value":"@activity('Find 835837DB Tables').output.value",
+						  "type":"Expression"
+					   },
+					   "activities":[
+						  {
+							 "name":"Lookup Old Watermark",
+							 "type":"Lookup",
+							 "dependsOn":[
+  
+							 ],
+							 "policy":{
+								"timeout":"0.12:00:00",
+								"retry":0,
+								"retryIntervalInSeconds":30,
+								"secureOutput":false,
+								"secureInput":false
+							 },
+							 "userProperties":[
+  
+							 ],
+							 "typeProperties":{
+								"source":{
+								   "type":"AzureSqlSource",
+								   "sqlReaderQuery":{
+									  "value":"SELECT * FROM [edi].[watermarktable] AS WatermarkValue WHERE table_name='@{item().Table_Name}'",
+									  "type":"Expression"
+								   },
+								   "queryTimeout":"02:00:00",
+								   "partitionOption":"None"
+								},
+								"dataset":{
+								   "referenceName":"hubdbsource",
+								   "type":"DatasetReference",
+								   "parameters":{
+  
+								   }
+								},
+								"firstRowOnly":true
+							 }
+						  },
+						  {
+							 "name":"Lookup New Watermark",
+							 "type":"Lookup",
+							 "dependsOn":[
+  
+							 ],
+							 "policy":{
+								"timeout":"0.12:00:00",
+								"retry":0,
+								"retryIntervalInSeconds":30,
+								"secureOutput":false,
+								"secureInput":false
+							 },
+							 "userProperties":[
+  
+							 ],
+							 "typeProperties":{
+								"source":{
+								   "type":"AzureSqlSource",
+								   "sqlReaderQuery":{
+									  "value":"SELECT MAX(updated_at) as NewWatermarkvalue FROM @{item().Table_Name}",
+									  "type":"Expression"
+								   },
+								   "queryTimeout":"02:00:00",
+								   "partitionOption":"None"
+								},
+								"dataset":{
+								   "referenceName":"hubdbsource",
+								   "type":"DatasetReference",
+								   "parameters":{
+  
+								   }
+								},
+								"firstRowOnly":true
+							 }
+						  },
+						  {
+							 "name":"Copy Table Data",
+							 "type":"Copy",
+							 "dependsOn":[
+								{
+								   "activity":"Lookup Old Watermark",
+								   "dependencyConditions":[
+									  "Succeeded"
+								   ]
+								},
+								{
+								   "activity":"Lookup New Watermark",
+								   "dependencyConditions":[
+									  "Succeeded"
+								   ]
+								}
+							 ],
+							 "policy":{
+								"timeout":"0.12:00:00",
+								"retry":0,
+								"retryIntervalInSeconds":30,
+								"secureOutput":false,
+								"secureInput":false
+							 },
+							 "userProperties":[
+  
+							 ],
+							 "typeProperties":{
+								"source":{
+								   "type":"AzureSqlSource",
+								   "sqlReaderQuery":{
+									  "value":"SELECT * FROM @{item().Table_Name} WHERE updated_at > '@{activity('Lookup Old Watermark').output.firstRow.watermark_value}'",
+									  "type":"Expression"
+								   },
+								   "queryTimeout":"02:00:00",
+								   "partitionOption":"None"
+								},
+								"sink":{
+								   "type":"DelimitedTextSink",
+								   "storeSettings":{
+									  "type":"AzureBlobFSWriteSettings"
+								   },
+								   "formatSettings":{
+									  "type":"DelimitedTextWriteSettings",
+									  "quoteAllText":true,
+									  "fileExtension":".txt"
+								   }
+								},
+								"enableStaging":false,
+								"translator":{
+								   "type":"TabularTranslator",
+								   "typeConversion":true,
+								   "typeConversionSettings":{
+									  "allowDataTruncation":true,
+									  "treatBooleanAsNumber":false
+								   }
+								}
+							 },
+							 "inputs":[
+								{
+								   "referenceName":"hubdbsource",
+								   "type":"DatasetReference",
+								   "parameters":{
+  
+								   }
+								}
+							 ],
+							 "outputs":[
+								{
+								   "referenceName":"RCM_Bronze_DelimitedText",
+								   "type":"DatasetReference",
+								   "parameters":{
+									  "FileExt":"csv",
+									  "FileTime":"@pipeline().TriggerTime"
+								   }
+								}
+							 ]
+						  },
+						  {
+							 "name":"Update Watermark",
+							 "type":"SqlServerStoredProcedure",
+							 "dependsOn":[
+								{
+								   "activity":"Copy Table Data",
+								   "dependencyConditions":[
+									  "Succeeded"
+								   ]
+								}
+							 ],
+							 "policy":{
+								"timeout":"0.12:00:00",
+								"retry":0,
+								"retryIntervalInSeconds":30,
+								"secureOutput":false,
+								"secureInput":false
+							 },
+							 "userProperties":[
+  
+							 ],
+							 "typeProperties":{
+								"storedProcedureName":"[[dbo].[usp_write_watermark]",
+								"storedProcedureParameters":{
+								   "LastModifiedtime":{
+									  "value":{
+										 "value":"@{activity('Lookup New Watermark').output.firstRow.NewWatermarkvalue}",
+										 "type":"Expression"
+									  },
+									  "type":"Datetime"
+								   },
+								   "TableName":{
+									  "value":{
+										 "value":"@{activity('Lookup Old Watermark').output.firstRow.table_name}",
+										 "type":"Expression"
+									  },
+									  "type":"String"
+								   }
+								},
+								"linkedServiceName":{
+								   "referenceName":"[parameters('EDIDEVDB')]",
+								   "type":"LinkedServiceReference"
+								}
+							 }
+						  }
+					   ]
+					}
+				 },
+				 {
+					"name":"Get Secret",
+					"type":"WebActivity",
+					"dependsOn":[
+  
+					],
+					"policy":{
+					   "timeout":"0.12:00:00",
+					   "retry":0,
+					   "retryIntervalInSeconds":30,
+					   "secureOutput":false,
+					   "secureInput":false
+					},
+					"userProperties":[
+  
+					],
+					"typeProperties":{
+					   "url":"https://deploysagekv.vault.azure.net/secrets/ADLSKEY/71679834c5ff437393d0e5a795b7ab7b?api-version=7.0",
+					   "method":"GET",
+					   "headers":{
+  
+					   },
+					   "authentication":{
+						  "type":"MSI",
+						  "resource":"https://vault.azure.net"
+					   }
+					}
+				 }
+			  ],
+			  "policy":{
+				 "elapsedTimeMetric":{
+  
+				 },
+				 "cancelAfter":{
+  
+				 }
+			  },
+			  "annotations":[
+  
+			  ],
+			  "lastPublishTime":"2023-06-07T13:24:59Z"
+		   },
+		   "dependsOn":[
+			  "[concat(variables('factoryId'), '/datasets/hubdbsource')]",
+			  "[concat(variables('factoryId'), '/datasets/RCM_Bronze_DelimitedText')]"
+		   ]
+		},
+		{
+		   "name":"[concat(parameters('factoryName'), '/hubdbsource)]",
+		   "type":"Microsoft.DataFactory/factories/datasets",
+		   "apiVersion":"2018-06-01",
+		   "properties":{
+			  "linkedServiceName":{
+				 "referenceName":"[parameters('hubdbsource)]",
+				 "type":"LinkedServiceReference"
+			  },
+			  "annotations":[
+  
+			  ],
+			  "type":"AzureSqlTable",
+			  "schema":[
+  
+			  ],
+			  "typeProperties":{
+  
+			  }
+		   },
+		   "dependsOn":[
+  
+		   ]
+		},
+		{
+		   "name":"[concat(parameters('factoryName'), '/RCM_Bronze_DelimitedText')]",
+		   "type":"Microsoft.DataFactory/factories/datasets",
+		   "apiVersion":"2018-06-01",
+		   "properties":{
+			  "linkedServiceName":{
+				 "referenceName":"[parameters('Azure835837bronzelake')]",
+				 "type":"LinkedServiceReference"
+			  },
+			  "parameters":{
+				 "FileExt":{
+					"type":"string",
+					"defaultValue":"csv"
+				 },
+				 "FileTime":{
+					"type":"string",
+					"defaultValue":"@pipeline().TriggerTime"
+				 }
+			  },
+			  "annotations":[
+  
+			  ],
+			  "type":"DelimitedText",
+			  "typeProperties":{
+				 "location":{
+					"type":"AzureBlobFSLocation",
+					"fileName":{
+					   "value":"@concat(dataset().FileTime,'.',dataset().FileExt)",
+					   "type":"Expression"
+					},
+					"folderPath":{
+					   "value":"835837/@{activity('Lookup Old Watermark').output.firstRow.table_name}/@{formatDateTime(utcnow(),'yyyy')}/@{formatDateTime(utcnow(),'MM')}/@{formatDateTime(utcnow(),'dd')}",
+					   "type":"Expression"
+					},
+					"fileSystem":"bronze"
+				 },
+				 "columnDelimiter":",",
+				 "escapeChar":"\\",
+				 "quoteChar":"\""
+			  },
+			  "schema":[
+  
+			  ]
+		   },
+		   "dependsOn":[
+  
+		   ]
+		}
+	 ]
+  }
