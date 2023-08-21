@@ -47,11 +47,11 @@ stages:
             resourceGroupName: '$(RESOURCE_GROUP)'
             location: '$(REGION)'
             templateLocation: 'Linked artifact'
-            csmFile: 'cicd/electroniz_batch_ingestion_pipeline.json'
-            overrideParameters: '-factoryName $(DATAFACTORY_NAME) -salesdbsource $(LAKEHOUSE_SALESDBSOURCE) -httpsource $(LAKEHOUSE_HTTPSOURCE) -traininglakehouse $(LAKEHOUSE_SOURCE) -websitetrackinglogs $(LAKEHOUSE_WEBTRACKING)  -restsource $(LAKEHOUSE_RESTSOURCE)'
+            csmFile: 'cicd/sage_batch_ingestion_pipeline.json'
+            overrideParameters: '-factoryName $(DATAFACTORY_NAME) -hubdbsource $(LAKEHOUSE_HUBDBSOURCE) -traininglakehouse $(LAKEHOUSE_SOURCE)'
             deploymentMode: 'Incremental'
             deploymentName: 'dataFactoryDeployment'
-
+/*
   - stage: Lakehouse_Batch_Curation_Pipeline
     jobs: 
       - job: DeployBatchCurationPipeline
@@ -111,4 +111,4 @@ stages:
             overrideParameters: '-factoryName $(DATAFACTORY_NAME)'
             deploymentMode: 'Incremental'
             deploymentName: 'dataFactoryDeployment'
-          
+*/          
