@@ -78,7 +78,9 @@
                   "typeProperties": {
                           "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=prodlakesagehealthy-ondemand.sql.azuresynapse.net;initial catalog=hubdb;user id=salesadmin;server=tcp:prodlakesagehealthy-ondemand.sql.azuresynapse.net,1433;persist security info=False;multipleactiveresultsets=False;trustservercertificate=False",
                           "encryptedCredential": "?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-12-31T09:37:29Z&st=2023-08-21T00:37:29Z&spr=https&sig=7ytWx6OLgY8eGcO9GoM1VP0TD6OAVxtDesK3JGQbQwg%3D"
-            },
+            
+		  }
+	     },
             "dependsOn": [
                 "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
             ]
