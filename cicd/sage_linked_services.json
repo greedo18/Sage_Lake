@@ -26,7 +26,7 @@
           "defaultValue": {
                 "signedServices": "bfqt",
                 "signedPermission": "rwdlacup",
-                "signedExpiry": "2021-08-01T00:00:01Z",
+                "signedExpiry": "2025-08-01T00:00:01Z",
                 "signedResourceTypes": "sco"
             }   
         },
