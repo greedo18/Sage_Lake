@@ -28,7 +28,7 @@ stages:
             location: '$(REGION)'
             templateLocation: 'Linked artifact'
             csmFile: 'cicd/sage_linked_services.json'
-            overrideParameters: '-factoryName $(DATAFACTORY_NAME) -synapseStorageAccount $(LAKEHOUSE_STORAGE_ACCOUNT) -synapseStorageAccountFilesystem  $(LAKEHOUSE_GOLD_LAYER) -SynapseServerless_connectionString "$(SYNAPSE_CON_STRING)" -Curation_Spark_Cluster_accessToken "$(SPARK_CLUSTER_TOKEN)" -hubdbsource_connectionString "$(SQL_CON_STRING)"'
+            overrideParameters: '-factoryName $(DATAFACTORY_NAME)'
             deploymentMode: 'Incremental'
             deploymentName: 'dataFactoryDeployment'
             
