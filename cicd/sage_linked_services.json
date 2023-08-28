@@ -21,15 +21,6 @@
             "description": "Gold Layer Storage Account filesystem for synapse "
           }    
         },
-        "sasProperties": {
-          "type": "object",
-          "defaultValue": {
-                "signedServices": "bfqt",
-                "signedPermission": "rwdlacup",
-                "signedExpiry": "2025-08-01T00:00:01Z",
-                "signedResourceTypes": "sco"
-            }   
-        },
         "factoryName": {
             "type": "string",
             "metadata": "Data Factory name",
@@ -46,10 +37,6 @@
         "hubdbsource_connectionString": {
             "type": "secureString",
             "metadata": "Secure string for 'connectionString' of 'hubdbsource'"
-        },
-        "traininglakehouse_properties_typeProperties_url": {
-            "type": "string",
-            "defaultValue": "https://proddlakesagehealthy.dfs.core.windows.net"
         }
     },
     "variables": {
@@ -69,123 +56,22 @@
             "resources": []
         },
         {
-            "name": "[concat(parameters('factoryName'), '/Synapse Serverless')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
-             "properties": {
-                "annotations": [],
-                "type": "AzureSqlDatabase",
-                  "typeProperties": {
-                          "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=prodlakesagehealthy-ondemand.sql.azuresynapse.net;initial catalog=hubdb;user id=salesadmin;server=tcp:prodlakesagehealthy-ondemand.sql.azuresynapse.net,1433;persist security info=False;multipleactiveresultsets=False;trustservercertificate=False",
-                          "encryptedCredential": "?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-12-31T09:37:29Z&st=2023-08-21T00:37:29Z&spr=https&sig=7ytWx6OLgY8eGcO9GoM1VP0TD6OAVxtDesK3JGQbQwg%3D"
-            
-		  }
-	     },
-            "dependsOn": [
-                "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
-            ]
-        },
-        {
-            "name": "[concat(parameters('factoryName'), '/traininglakehouse')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
+            "name": "Azure835837bronzelake",
+            "type": "Microsoft.DataFactory/factories/linkedservices",
             "properties": {
                 "annotations": [],
                 "type": "AzureBlobFS",
                 "typeProperties": {
-                    "url": "[parameters('traininglakehouse_properties_typeProperties_url')]",
-                    "accountKey": {
-                        "type": "SecureString",
-                        "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('synapseStorageAccount')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
-                    }
+                    "url": "https://proddlakesagehealthy.dfs.core.windows.net/",
+                    "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZFODY2QTA2LTlCQ0QtNDI3MC1CQjcxLUNGNDQ4ODQwNUM5OF8zNmY0MTY4ZS1kYTBlLTQxNzgtYTc2OS1mMTc0NjE0ZjdkMjgiDQp9"
                 }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
-            ]
+            }
         },
         {
-            "name": "[concat(parameters('factoryName'), '/gold_data')]",
-            "type": "Microsoft.DataFactory/factories/datasets",
-            "apiVersion": "2018-06-01",
+            "name": "RCM_Bronze_DelimitedText",
             "properties": {
                 "linkedServiceName": {
-                    "referenceName": "traininglakehouse",
-                    "type": "LinkedServiceReference"
-                },
-                "annotations": [],
-                "type": "Binary",
-                "typeProperties": {
-                    "location": {
-                        "type": "AzureBlobFSLocation",
-                        "folderPath": "external",
-                        "fileSystem": "gold"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/linkedServices/traininglakehouse')]"
-            ]
-        },
-        {
-            "name": "[concat(parameters('factoryName'), '/Curation Spark Cluster')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "type": "AzureDatabricks",
-                "typeProperties": {
-                    "domain": "https://adb-928044290183962.2.azuredatabricks.net",
-                    "accessToken": {
-                        "type": "SecureString",
-                        "value": "[parameters('Curation_Spark_Cluster_accessToken')]"
-                    },
-                    "existingClusterId": "<DataBricksclusterID>"
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
-            ]
-        },
-        {
-            "name": "[concat(parameters('factoryName'), '/hubdbsource')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "type": "AzureSqlDatabase",
-                  "typeProperties": {
-                          "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=huboneev.database.windows.net;initial catalog=hubdb;user id=pierre_carpentier;Password=password@1234;server=tcp:huboneev.database.windows.net,1433;persist security info=False;multipleactiveresultsets=False;trustservercertificate=False"                   }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
-            ]
-        },
-        {
-            "name": "[concat(parameters('factoryName'), '/hubdbds')]",
-            "type": "Microsoft.DataFactory/factories/datasets",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "linkedServiceName": {
-                    "referenceName": "hubdbsource",
-                    "type": "LinkedServiceReference"
-                },
-                "annotations": [],
-                "type": "AzureSqlTable",
-                "schema": [],
-                "typeProperties": {}
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/linkedServices/hubdbsource')]"
-            ]
-        },
-        {
-            "name": "[concat(parameters('factoryName'), '/HubDelimitedText')]",
-            "type": "Microsoft.DataFactory/factories/datasets",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "linkedServiceName": {
-                    "referenceName": "traininglakehouse",
+                    "referenceName": "Azure835837bronzelake",
                     "type": "LinkedServiceReference"
                 },
                 "parameters": {
@@ -203,8 +89,14 @@
                 "typeProperties": {
                     "location": {
                         "type": "AzureBlobFSLocation",
-                        "fileName": "@concat(dataset().FileTime,'.',dataset().FileExt)",
-                        "folderPath": "hub/@{activity('Lookup Old Watermark').output.firstRow.table_name}/@{formatDateTime(utcnow(),'yyyy')}/@{formatDateTime(utcnow(),'MM')}/@{formatDateTime(utcnow(),'dd')}/@{formatDateTime(utcnow(),'HH')}",
+                        "fileName": {
+                            "value": "@concat(dataset().FileTime,'.',dataset().FileExt)",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "835837/@{activity('Lookup Old Watermark').output.firstRow.table_name}/@{formatDateTime(utcnow(),'yyyy')}/@{formatDateTime(utcnow(),'MM')}/@{formatDateTime(utcnow(),'dd')}",
+                            "type": "Expression"
+                        },
                         "fileSystem": "bronze"
                     },
                     "columnDelimiter": ",",
@@ -213,9 +105,60 @@
                 },
                 "schema": []
             },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/linkedServices/traininglakehouse')]"
-            ]
+            "type": "Microsoft.DataFactory/factories/datasets"
+        },
+        {
+            "name": "Curation Spark Cluster",
+            "type": "Microsoft.DataFactory/factories/linkedservices",
+            "properties": {
+                "annotations": [],
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": "https://adb-483452463576872.12.azuredatabricks.net",
+                    "existingClusterId": "0702-012900-o9qs0pea",
+                    "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZFODY2QTA2LTlCQ0QtNDI3MC1CQjcxLUNGNDQ4ODQwNUM5OF84N2MyZmVmNy0zZjkzLTRhZTktYjM4Zi0yZWMxNGYxNzgyYjIiDQp9"
+                }
+            }
+        },
+        {
+            "name": "EDIDEVDB",
+            "type": "Microsoft.DataFactory/factories/linkedservices",
+            "properties": {
+                "description": "hub dev db",
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=huboneev.database.windows.net;initial catalog=HubONE_Dev;user id=pierre_carpentier",
+                    "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZFODY2QTA2LTlCQ0QtNDI3MC1CQjcxLUNGNDQ4ODQwNUM5OF8zYjFmNjRhZi05NDRhLTRiNmEtYjYyNi03ZmNkOGM2NmJiMjciDQp9"
+                }
+            }
+        },
+        {
+            "name": "EDIDEVDB",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "EDIDEVDB",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": []
+            },
+            "type": "Microsoft.DataFactory/factories/datasets"
+        },
+        {
+            "name": "Synapse Serverless",
+            "type": "Microsoft.DataFactory/factories/linkedservices",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=835837gold-ondemand.sql.azuresynapse.net;initial catalog=gold;user id=sqladminuser",
+                    "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZFODY2QTA2LTlCQ0QtNDI3MC1CQjcxLUNGNDQ4ODQwNUM5OF80Mjc1YmI2MC0yODc1LTQ4MmItYWM0My04Mzk5YzY5YjIzZjEiDQp9"
+                }
+            }
         }
     ]
 }
+        
+        

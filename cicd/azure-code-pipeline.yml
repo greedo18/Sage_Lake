@@ -32,26 +32,26 @@ stages:
             deploymentMode: 'Incremental'
             deploymentName: 'dataFactoryDeployment'
             
-  - stage: Lakehouse_Batch_Ingestion_Pipeline
-    jobs: 
-      - job: DeployBatchIngestionPipeline
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-        - task: AzureResourceManagerTemplateDeployment@3
-          inputs:
-            deploymentScope: 'Resource Group'
-            azureResourceManagerConnection: '$(SERVICE_CONNECTION)'
-            subscriptionId: '$(SUBSCRIPTION_ID)'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: '$(RESOURCE_GROUP)'
-            location: '$(REGION)'
-            templateLocation: 'Linked artifact'
-            csmFile: 'cicd/sage_batch_ingestion_pipeline.json'
-            overrideParameters: '-factoryName $(DATAFACTORY_NAME) -hubdbsource $(LAKEHOUSE_HUBDBSOURCE) -traininglakehouse $(LAKEHOUSE_SOURCE)'
-            deploymentMode: 'Incremental'
-            deploymentName: 'dataFactoryDeployment'
-
+#  - stage: Lakehouse_Batch_Ingestion_Pipeline
+#    jobs: 
+#      - job: DeployBatchIngestionPipeline
+#        pool:
+#          vmImage: ubuntu-latest
+#        steps:
+#        - task: AzureResourceManagerTemplateDeployment@3
+#          inputs:
+#            deploymentScope: 'Resource Group'
+#            azureResourceManagerConnection: '$(SERVICE_CONNECTION)'
+#            subscriptionId: '$(SUBSCRIPTION_ID)'
+#            action: 'Create Or Update Resource Group'
+#            resourceGroupName: '$(RESOURCE_GROUP)'
+#            location: '$(REGION)'
+#            templateLocation: 'Linked artifact'
+#            csmFile: 'cicd/sage_batch_ingestion_pipeline.json'
+#            overrideParameters: '-factoryName $(DATAFACTORY_NAME) -hubdbsource $(LAKEHOUSE_HUBDBSOURCE) -traininglakehouse $(LAKEHOUSE_SOURCE)'
+#            deploymentMode: 'Incremental'
+#            deploymentName: 'dataFactoryDeployment'
+#
 #  - stage: Lakehouse_Batch_Curation_Pipeline
 #    jobs: 
 #      - job: DeployBatchCurationPipeline
