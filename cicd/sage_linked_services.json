@@ -9,38 +9,13 @@
             "description": "Location for all resources."
           }    
         },
-        "synapseStorageAccount": {
-          "type": "string",
-          "metadata": {
-            "description": "Storage Account for synapse"
-          }    
-        },
-        "synapseStorageAccountFilesystem": {
-          "type": "string",
-          "metadata": {
-            "description": "Gold Layer Storage Account filesystem for synapse "
-          }    
-        },
         "factoryName": {
             "type": "string",
             "metadata": "Data Factory name",
             "defaultValue": "prod-dlake-SageHealthy-Datafactory"
         },
-        "SynapseServerless_connectionString": {
-            "type": "secureString",
-            "metadata": "Secure string for 'connectionString' of 'Synapse Serverless'"
-        },
-        "Curation_Spark_Cluster_accessToken": {
-            "type": "secureString",
-            "metadata": "Secure string for 'accessToken' of 'Curation Spark Cluster'"
-        },
-        "hubdbsource_connectionString": {
-            "type": "secureString",
-            "metadata": "Secure string for 'connectionString' of 'hubdbsource'"
-        }
     },
     "variables": {
-         "dataLakeStorageAccountUrl": "[concat('https://', parameters('synapseStorageAccount'), '.dfs.core.windows.net')]",
          "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
     },
     "resources": [
