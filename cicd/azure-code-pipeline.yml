@@ -1,36 +1,36 @@
 trigger:
   branches:
     include:
-    - main
-    - cicd/*
+      - main
+      - cicd/*
   paths:
     include:
-    - cicd/*
+      - cicd/*
 
 variables:
   - group: 'sage_code_variables'
 
 stages:
-          
   - stage: Lakehouse_Linked_services
     jobs: 
       - job: DeployLinkedServices
         pool:
           vmImage: ubuntu-latest
         steps:
-        - task: AzureResourceManagerTemplateDeployment@3
-          inputs:
-            deploymentScope: 'Resource Group'
-            azureResourceManagerConnection: '$(SERVICE_CONNECTION)'
-            subscriptionId: '$(SUBSCRIPTION_ID)'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: '$(RESOURCE_GROUP)'
-            location: '$(REGION)'
-            templateLocation: 'Linked artifact'
-            csmFile: 'cicd/sage_linked_services.json'
-            overrideParameters: '-factoryName $(DATAFACTORY_NAME)'
-            deploymentMode: 'Incremental'
-            deploymentName: 'dataFactoryDeployment'
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: 'Resource Group'
+              azureResourceManagerConnection: '$(SERVICE_CONNECTION)'
+              subscriptionId: '$(SUBSCRIPTION_ID)'
+              action: 'Create Or Update Resource Group'
+              resourceGroupName: '$(RESOURCE_GROUP)'
+              location: '$(REGION)'
+              templateLocation: 'Linked artifact'
+              csmFile: 'cicd/sage_linked_services.json'
+              overrideParameters: '-factoryName $(DATAFACTORY_NAME)'
+              deploymentMode: 'Incremental'
+              deploymentName: 'dataFactoryDeployment'
+
             
 #  - stage: Lakehouse_Batch_Ingestion_Pipeline
 #    jobs: 
